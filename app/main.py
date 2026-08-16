@@ -40,7 +40,7 @@ def create_app(
     generation_service = GenerationService(
         unit_of_work_factory=unit_of_work_factory,
         fal_gateway=fal_gateway,
-        webhook_url=settings.fal_webhook_url,
+        webhook_url=settings.resolved_fal_webhook_url,
         generation_cost=settings.image_generation_cost,
     )
 
