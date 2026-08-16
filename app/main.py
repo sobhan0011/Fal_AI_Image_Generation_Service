@@ -3,6 +3,8 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -54,6 +56,11 @@ def create_app(
         version="1.0.0",
         lifespan=lifespan,
     )
+
+    @app.get("/", include_in_schema=False)
+    async def root():
+        return RedirectResponse(url="/docs")
+
     app.state.settings = settings
     app.state.database = database
     app.state.generation_service = generation_service
