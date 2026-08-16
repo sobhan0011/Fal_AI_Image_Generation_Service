@@ -1,0 +1,17 @@
+import fal_client
+
+
+try:
+    handle = fal_client.submit(
+        "fal-ai/nano-banana",
+        arguments={
+            "prompt": "a futuristic cityscape at sunset",
+            "aspect_ratio": "1:1",
+        },
+    )
+
+    print("REQUEST ID:", handle.request_id)
+
+except Exception as exc:
+    print(type(exc).__name__)
+    print(str(exc))

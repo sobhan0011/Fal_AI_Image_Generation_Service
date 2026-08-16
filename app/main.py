@@ -3,6 +3,8 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from dotenv import load_dotenv
+load_dotenv()
 
 from .config import Settings
 
@@ -15,17 +17,21 @@ from .infrastructure.database.database import Database
 from .infrastructure.fal.gateway import FalClientGateway
 from .infrastructure.fal.webhook import FalWebhookVerifier
 from .infrastructure.database.unit_of_work import SqlAlchemyGenerationUnitOfWorkFactory
+from .application.ports import FalGateway
 
-
-def create_app() -> FastAPI:
-    settings = Settings()
+def create_app(
+    settings: Settings | None = None,
+    fal_gateway: FalGateway | None = None,
+) -> FastAPI:
+    settings = settings or Settings()
 
     database = Database(settings.database_url)
 
     unit_of_work_factory = SqlAlchemyGenerationUnitOfWorkFactory(database.session_factory)
     
-    fal_gateway = FalClientGateway(settings.fal_model)
-
+    fal_gateway = fal_gateway or FalClientGateway(
+        settings.fal_model
+    )
     webhook_verifier = FalWebhookVerifier(
         jwks_url=settings.fal_jwks_url,
         timestamp_tolerance_seconds=settings.fal_webhook_timestamp_tolerance_seconds,
