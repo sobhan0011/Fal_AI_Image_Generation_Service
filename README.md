@@ -639,6 +639,78 @@ include = ["app*"]
 exclude = ["alembic*", "tests*"]
 ```
 
+## Reviewer / demo usage
+
+The deployed API keeps Swagger publicly available, but `POST /generate/image` is protected with a small demo key so random visitors cannot spend fal.ai credits.
+
+Open the deployed service:
+
+```text
+https://YOUR-SERVICE.onrender.com/
+```
+
+The root redirects to Swagger:
+
+```text
+https://YOUR-SERVICE.onrender.com/docs
+```
+
+To run an image generation from Swagger:
+
+1. Open `POST /generate/image`.
+2. Click **Try it out**.
+3. Enter the shared demo password in the `x-demo-key` header field.
+4. Use a request body such as:
+
+```json
+{
+  "user_id": "11111111-1111-1111-1111-111111111111",
+  "prompt": "a red apple on a white table",
+  "aspect_ratio": "1:1"
+}
+```
+
+5. Click **Execute**.
+
+A successful request is accepted with a response similar to:
+
+```json
+{
+  "request_id": "fal-request-id",
+  "status": "IN_QUEUE",
+  "cost": "50.00"
+}
+```
+
+The reviewer must obtain the demo key separately from the project owner. It is stored on Render as:
+
+```text
+DEMO_KEY=<shared-secret>
+```
+
+Do not commit the demo key to GitHub or place it in this README.
+
+The same request can be sent outside Swagger with:
+
+```bash
+curl -X POST "https://YOUR-SERVICE.onrender.com/generate/image" \
+  -H "Content-Type: application/json" \
+  -H "X-Demo-Key: YOUR_DEMO_KEY" \
+  -d '{
+    "user_id": "11111111-1111-1111-1111-111111111111",
+    "prompt": "a red apple on a white table",
+    "aspect_ratio": "1:1"
+  }'
+```
+
+The demo-key check protects only the generation route. The fal.ai callback remains publicly reachable because fal.ai must be able to deliver the webhook; callback authenticity is handled separately by fal webhook signature verification.
+
+After submission, generation history can be checked with:
+
+```text
+GET /my-files/11111111-1111-1111-1111-111111111111
+```
+
 ## Important production improvements
 
 Before treating this as a full production payment/credit service:
