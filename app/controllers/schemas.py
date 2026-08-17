@@ -25,7 +25,9 @@ AspectRatio = Literal[
 
 
 class GenerateImageRequest(BaseModel):
-    user_id: UUID
+    user_id: UUID = Field(
+        default=UUID("11111111-1111-1111-1111-111111111111")
+    )
     prompt: str = Field(min_length=1, max_length=4000)
     aspect_ratio: AspectRatio = "1:1"
 
