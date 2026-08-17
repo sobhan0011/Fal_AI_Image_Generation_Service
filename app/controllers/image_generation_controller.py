@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import os
+import secrets
+
 from pydantic import ValidationError
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Header, HTTPException, Request, status
 
 from ..infrastructure.fal.webhook import FalWebhookBody
 from .dependencies import FalWebhookVerifierDep, GenerationServiceDep, SettingsDep
@@ -22,7 +25,20 @@ router = APIRouter(
 async def generate_image(
     body: GenerateImageRequest,
     service: GenerationServiceDep,
+    x_demo_key: str | None = Header(default=None),
 ) -> GenerateImageResponse:
+    expected_key = os.getenv("DEMO_KEY")
+
+    if (
+        not expected_key
+        or not x_demo_key
+        or not secrets.compare_digest(x_demo_key, expected_key)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid demo key",
+        )
+
     job = await service.generate(
         user_id=body.user_id,
         prompt=body.prompt,
